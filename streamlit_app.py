@@ -2,10 +2,13 @@ import streamlit as st
 import nltk
 from app import analyze_multiple_resumes, download_nltk_resources
 
+# Set page configuration
+st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
+
 # Download NLTK resources at the start of the app
 with st.spinner('Initializing NLTK resources...'):
     download_nltk_resources()
-st.success.subheader('Ats Score Analyzer!')
+# st.success.subheader('Ats Score Analyzer!')
 
 # Job Description input
 job_description = st.text_area("Enter Job Description", height=300)
