@@ -5,7 +5,7 @@ from app import analyze_multiple_resumes, download_nltk_resources
 # Download NLTK resources at the start of the app
 with st.spinner('Initializing NLTK resources...'):
     download_nltk_resources()
-st.success('NLTK resources initialized successfully!')
+st.success.subheader('Ats Score Analyzer!')
 
 # Job Description input
 job_description = st.text_area("Enter Job Description", height=300)
