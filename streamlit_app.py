@@ -1,6 +1,6 @@
-# import streamlit as st
-# import nltk
-# from app import analyze_multiple_resumes, download_nltk_resources
+import streamlit as st
+import nltk
+from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
 st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
