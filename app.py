@@ -8,7 +8,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from word2number import w2n
 
-# Function to download NLTK resources
 def download_nltk_resources():
     try:
         nltk.data.find('tokenizers/punkt')
@@ -18,8 +17,6 @@ def download_nltk_resources():
         nltk.data.find('corpora/stopwords')
     except LookupError:
         nltk.download('stopwords', quiet=True)
-
-download_nltk_resources()
 
 def extract_text(file_path):
     _, file_extension = os.path.splitext(file_path)
@@ -43,8 +40,12 @@ def extract_text_from_other(file_path):
     return textract.process(file_path).decode('utf-8')
 
 def preprocess_text(text):
-    tokens = nltk.word_tokenize(text)
-    return " ".join(token.lower() for token in tokens if token.isalpha())
+    try:
+        tokens = nltk.word_tokenize(text)
+        return " ".join(token.lower() for token in tokens if token.isalpha())
+    except LookupError:
+        # If NLTK data is not available, fall back to basic preprocessing
+        return " ".join(word.lower() for word in text.split() if word.isalpha())
 
 def extract_skills(text, skills):
     skills_found = set()
@@ -101,36 +102,48 @@ def analyze_experience(resume_text):
     return experience_years
 
 def calculate_ats_score(resume_path, job_description, skills, experience_years):
-    resume_text = extract_text(resume_path)
-    preprocessed_resume = preprocess_text(resume_text)
-    preprocessed_job = preprocess_text(job_description)
-    
-    resume_skills = extract_skills(preprocessed_resume, skills)
-    job_skills = extract_skills(preprocessed_job, skills)
-    
-    keyword_score = calculate_keyword_score(preprocessed_resume, preprocessed_job)
-    structure_score = analyze_resume_structure(resume_text)
-    skill_match_score = calculate_skill_match(resume_skills, job_skills)
-    total_experience_years = analyze_experience(resume_text)
+    try:
+        resume_text = extract_text(resume_path)
+        preprocessed_resume = preprocess_text(resume_text)
+        preprocessed_job = preprocess_text(job_description)
+        
+        resume_skills = extract_skills(preprocessed_resume, skills)
+        job_skills = extract_skills(preprocessed_job, skills)
+        
+        keyword_score = calculate_keyword_score(preprocessed_resume, preprocessed_job)
+        structure_score = analyze_resume_structure(resume_text)
+        skill_match_score = calculate_skill_match(resume_skills, job_skills)
+        total_experience_years = analyze_experience(resume_text)
 
-    # Adjust weights based on importance
-    final_score = (
-        keyword_score * 0.4 +
-        structure_score * 0.2 +
-        skill_match_score * 0.3 +
-        min(total_experience_years, experience_years) * 0.1
-    )
-    
-    return {
-        'final_score': final_score,
-        'keyword_score': keyword_score,
-        'structure_score': structure_score,
-        'skill_match_score': skill_match_score,
-        'experience_years': total_experience_years,
-        'resume_skills': resume_skills,
-        'job_skills': job_skills,
-        'contact_info': extract_contact_info(resume_text)
-    }
+        final_score = (
+            keyword_score * 0.4 +
+            structure_score * 0.2 +
+            skill_match_score * 0.3 +
+            min(total_experience_years, experience_years) * 0.1
+        )
+        
+        return {
+            'final_score': final_score,
+            'keyword_score': keyword_score,
+            'structure_score': structure_score,
+            'skill_match_score': skill_match_score,
+            'experience_years': total_experience_years,
+            'resume_skills': resume_skills,
+            'job_skills': job_skills,
+            'contact_info': extract_contact_info(resume_text)
+        }
+    except Exception as e:
+        return {
+            'error': str(e),
+            'final_score': 0,
+            'keyword_score': 0,
+            'structure_score': 0,
+            'skill_match_score': 0,
+            'experience_years': 0,
+            'resume_skills': set(),
+            'job_skills': set(),
+            'contact_info': {}
+        }
 
 def analyze_multiple_resumes(resume_paths, job_description, skills, experience_years):
     results = {}
