@@ -32,6 +32,35 @@ experience_years = st.number_input("Enter Required Experience (in years)", min_v
 # File upload
 uploaded_files = st.file_uploader("Upload Resumes", type=["pdf", "docx"], accept_multiple_files=True)
 
+# if st.button("View Scores"):
+#     if job_description and skills and experience_years > 0 and uploaded_files:
+#         resume_paths = []
+#         for uploaded_file in uploaded_files:
+#             with open(uploaded_file.name, "wb") as f:
+#                 f.write(uploaded_file.getbuffer())
+#                 resume_paths.append(uploaded_file.name)
+        
+#         try:
+#             results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
+        
+#             st.subheader("Resume Scores:")
+#             for resume_name, scores in results.items():
+#                 st.write(f"### {resume_name}")
+#                 if 'error' in scores:
+#                     st.error(f"Error processing this resume: {scores['error']}")
+#                 else:
+#                     st.write(f"**Final Score:** {scores['final_score']:.2f}")
+#                     st.write(f"**Keyword Match Score:** {scores['keyword_score']:.2f}")
+#                     st.write(f"**Resume Structure Score:** {scores['structure_score']:.2f}")
+#                     st.write(f"**Skill Match Score:** {scores['skill_match_score']:.2f}")
+#                     st.write(f"**Years of Experience:** {scores['experience_years']}")
+#                     st.write(f"**Contact Info:** {scores['contact_info']}")
+#                 st.write("---")
+#         except Exception as e:
+#             st.error(f"An error occurred while processing the resumes: {str(e)}")
+#     else:
+#         st.error("Please fill in all fields and upload at least one resume.")
+
 if st.button("View Scores"):
     if job_description and skills and experience_years > 0 and uploaded_files:
         resume_paths = []
@@ -56,10 +85,35 @@ if st.button("View Scores"):
                     st.write(f"**Years of Experience:** {scores['experience_years']}")
                     st.write(f"**Contact Info:** {scores['contact_info']}")
                 st.write("---")
+
+            # Add CSV export functionality
+            if st.button("Download CSV"):
+                csv_data = []
+                for resume_name, scores in results.items():
+                    if 'error' in scores:
+                        continue  # Skip resumes with errors
+                    csv_data.append({
+                        "Resume Name": resume_name,
+                        "Final Score": scores['final_score'],
+                        "Keyword Match Score": scores['keyword_score'],
+                        "Resume Structure Score": scores['structure_score'],
+                        "Skill Match Score": scores['skill_match_score'],
+                        "Years of Experience": scores['experience_years'],
+                        "Contact Info": str(scores['contact_info'])  # Convert dict to string for CSV
+                    })
+
+                df = pd.DataFrame(csv_data)
+                csv_file = "resume_scores.csv"
+                df.to_csv(csv_file, index=False)
+
+                with open(csv_file, "rb") as f:
+                    st.download_button("Download CSV", f, file_name=csv_file)
+
         except Exception as e:
             st.error(f"An error occurred while processing the resumes: {str(e)}")
     else:
         st.error("Please fill in all fields and upload at least one resume.")
+
 
 
 
