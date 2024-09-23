@@ -1,7 +1,8 @@
 import streamlit as st
-import csv
-import io
+import pandas as pd
+import nltk
 from app import analyze_multiple_resumes, download_nltk_resources
+import io  # For handling in-memory file objects
 
 # Set page configuration
 st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
@@ -44,31 +45,41 @@ if st.button("View Scores"):
             # Analyze resumes
             results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
             
-            # Prepare CSV data manually
-            csv_buffer = io.StringIO()
-            writer = csv.writer(csv_buffer)
-            
-            # Write headers
-            writer.writerow(['Resume Name', 'Final Score', 'Keyword Match Score', 'Resume Structure Score', 'Skill Match Score', 'Years of Experience', 'Contact Info'])
-
-            # Write data
+            # Store results in a Pandas DataFrame for CSV export
+            resume_data = []
             for resume_name, scores in results.items():
                 if 'error' in scores:
-                    writer.writerow([resume_name, scores['error'], '', '', '', '', ''])
+                    resume_data.append({
+                        "Resume": resume_name,
+                        "Error": scores['error']
+                    })
                 else:
-                    writer.writerow([resume_name, scores['final_score'], scores['keyword_score'], scores['structure_score'], scores['skill_match_score'], scores['experience_years'], scores['contact_info']])
+                    resume_data.append({
+                        "Resume": resume_name,
+                        "Final Score": scores['final_score'],
+                        "Keyword Match Score": scores['keyword_score'],
+                        "Resume Structure Score": scores['structure_score'],
+                        "Skill Match Score": scores['skill_match_score'],
+                        "Years of Experience": scores['experience_years'],
+                        "Contact Info": scores['contact_info']
+                    })
 
-            # Get CSV data from buffer
-            csv_data = csv_buffer.getvalue()
+            # Create DataFrame
+            df = pd.DataFrame(resume_data)
 
-            # Create download button
+            # Display results
+            st.subheader("Resume Scores:")
+            st.write(df)
+
+            # CSV Download Button
+            csv = df.to_csv(index=False)
             st.download_button(
-                label="Download results as CSV",
-                data=csv_data,
-                file_name='resume_scores.csv',
-                mime='text/csv'
+                label="Download Resume Scores as CSV",
+                data=csv,
+                file_name="resume_scores.csv",
+                mime="text/csv",
             )
-
+        
         except Exception as e:
             st.error(f"An error occurred while processing the resumes: {str(e)}")
     else:
