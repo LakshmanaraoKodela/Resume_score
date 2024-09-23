@@ -77,9 +77,10 @@ elif st.session_state.page == "Analyze Resumes":
             with st.spinner('Analyzing resumes... Please wait.'):
                 resume_paths = []
                 for uploaded_file in uploaded_files:
-                    with open(uploaded_file.name, "wb") as f:
+                    unique_filename = f"{time.time()}_{uploaded_file.name}"
+                    with open(unique_filename, "wb") as f:
                         f.write(uploaded_file.getbuffer())
-                        resume_paths.append(uploaded_file.name)
+                        resume_paths.append(unique_filename)
                 
                 try:
                     results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
