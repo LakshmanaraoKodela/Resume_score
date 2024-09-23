@@ -1,6 +1,10 @@
+# import streamlit as st
+# import nltk
+# from app import analyze_multiple_resumes, download_nltk_resources
 import streamlit as st
-import nltk
 import pandas as pd
+import os
+import nltk
 from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
