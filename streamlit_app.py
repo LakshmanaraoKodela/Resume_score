@@ -1,5 +1,6 @@
 import streamlit as st
 import nltk
+import pandas as pd
 from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
