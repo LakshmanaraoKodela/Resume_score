@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import nltk
 from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
@@ -41,50 +40,46 @@ if st.button("View Scores"):
                 resume_paths.append(uploaded_file.name)
         
         try:
+            # Analyze resumes
             results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
             
-            # Prepare data for CSV
-            csv_data = []
-            
-            st.subheader("Resume Scores:")
+            # Create DataFrame for results
+            data = []
             for resume_name, scores in results.items():
-                st.write(f"### {resume_name}")
                 if 'error' in scores:
-                    st.error(f"Error processing this resume: {scores['error']}")
+                    data.append({
+                        'Resume Name': resume_name,
+                        'Error': scores['error']
+                    })
                 else:
-                    st.write(f"**Final Score:** {scores['final_score']:.2f}")
-                    st.write(f"**Keyword Match Score:** {scores['keyword_score']:.2f}")
-                    st.write(f"**Resume Structure Score:** {scores['structure_score']:.2f}")
-                    st.write(f"**Skill Match Score:** {scores['skill_match_score']:.2f}")
-                    st.write(f"**Years of Experience:** {scores['experience_years']}")
-                    st.write(f"**Contact Info:** {scores['contact_info']}")
-                    st.write("---")
-                    
-                    # Append data to CSV rows
-                    csv_data.append({
-                        "Resume Name": resume_name,
-                        "Final Score": scores['final_score'],
-                        "Keyword Match Score": scores['keyword_score'],
-                        "Resume Structure Score": scores['structure_score'],
-                        "Skill Match Score": scores['skill_match_score'],
-                        "Years of Experience": scores['experience_years'],
-                        "Contact Info": scores['contact_info']
+                    data.append({
+                        'Resume Name': resume_name,
+                        'Final Score': scores['final_score'],
+                        'Keyword Match Score': scores['keyword_score'],
+                        'Resume Structure Score': scores['structure_score'],
+                        'Skill Match Score': scores['skill_match_score'],
+                        'Years of Experience': scores['experience_years'],
+                        'Contact Info': scores['contact_info']
                     })
             
-            # Convert results to DataFrame for CSV download
-            csv_df = pd.DataFrame(csv_data)
-            
+            # Convert the list to DataFrame
+            df = pd.DataFrame(data)
+
+            # Display the scores
+            st.subheader("Resume Scores:")
+            st.write(df)
+
             # Convert DataFrame to CSV
-            csv = csv_df.to_csv(index=False).encode('utf-8')
-            
-            # Download Button for CSV
+            csv = df.to_csv(index=False)
+
+            # Download button for CSV file
             st.download_button(
-                label="Download Results as CSV",
+                label="Download results as CSV",
                 data=csv,
                 file_name='resume_scores.csv',
                 mime='text/csv'
             )
-        
+
         except Exception as e:
             st.error(f"An error occurred while processing the resumes: {str(e)}")
     else:
