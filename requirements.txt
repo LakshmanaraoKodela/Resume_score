@@ -5,12 +5,5 @@ textract
 nltk
 scikit-learn
 word2number
-pandas==1.3.3
+pandas
 numpy
-openpyxl  # or xlsxwriter
-fuzzywuzzy  # optional for text matching
-tqdm  # optional for progress bars
-regex  # optional for text processing
-spacy  # optional for advanced NLP
-joblib  # optional for model saving/loading
-xlsxwriter
