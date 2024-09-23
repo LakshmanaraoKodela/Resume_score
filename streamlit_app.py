@@ -1,8 +1,11 @@
 import streamlit as st
 from app import analyze_multiple_resumes, download_nltk_resources
 
-# Download NLTK resources at the start of the app
-download_nltk_resources()
+with st.spinner('Downloading required resources...'):
+    download_nltk_resources()
+st.success('Resources downloaded successfully!')
+
+st.title("Resume ATS Scoring Application")
 
 st.title("Resume ATS Scoring Application")
 
