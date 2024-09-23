@@ -7,14 +7,21 @@ import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from word2number import w2n
+from nltk.tokenize import word_tokenize
 
 def download_nltk_resources():
-    resources = ['punkt', 'averaged_perceptron_tagger', 'maxent_ne_chunker', 'words', 'stopwords']
+    resources = ['punkt', 'averaged_perceptron_tagger', 'maxent_ne_chunker', 'words', 'stopwords', 'punkt_tab']
     for resource in resources:
         try:
             nltk.data.find(f'tokenizers/{resource}')
         except LookupError:
-            nltk.download(resource, quiet=True)
+            try:
+                nltk.download(resource, quiet=True)
+            except Exception as e:
+                print(f"Error downloading {resource}: {str(e)}")
+
+def fallback_tokenize(text):
+    return text.split()
 
 def extract_text(file_path):
     _, file_extension = os.path.splitext(file_path)
@@ -39,11 +46,11 @@ def extract_text_from_other(file_path):
 
 def preprocess_text(text):
     try:
-        tokens = nltk.word_tokenize(text)
-        return " ".join(token.lower() for token in tokens if token.isalpha())
+        tokens = word_tokenize(text)
     except LookupError:
-        # If NLTK data is not available, fall back to basic preprocessing
-        return " ".join(word.lower() for word in text.split() if word.isalpha())
+        print("Warning: NLTK tokenizer not available. Using fallback tokenization.")
+        tokens = fallback_tokenize(text)
+    return " ".join(token.lower() for token in tokens if token.isalpha())
 
 def extract_skills(text, skills):
     skills_found = set()
@@ -74,7 +81,11 @@ def calculate_keyword_score(resume_text, job_description):
 
 def analyze_resume_structure(resume_text):
     sections = ["summary", "experience", "education", "skills", "projects", "role", "certifications", "work history"]
-    score = sum(1 for section in sections if re.search(r'\b' + section + r'\b', resume_text, re.IGNORECASE))
+    try:
+        score = sum(1 for section in sections if section in resume_text.lower().split())
+    except Exception as e:
+        print(f"Error in analyze_resume_structure: {str(e)}")
+        score = 0
     return (score / len(sections)) * 100
 
 def calculate_skill_match(resume_skills, job_skills):
@@ -82,7 +93,12 @@ def calculate_skill_match(resume_skills, job_skills):
     return (len(matched_skills) / len(job_skills)) * 100 if job_skills else 0
 
 def analyze_experience(resume_text):
-    tokens = nltk.word_tokenize(resume_text.lower())
+    try:
+        tokens = word_tokenize(resume_text.lower())
+    except LookupError:
+        print("Warning: NLTK tokenizer not available. Using fallback tokenization.")
+        tokens = fallback_tokenize(resume_text.lower())
+    
     experience_years = 0
     experience_keywords = ["experience", "work", "working"]
 
@@ -142,6 +158,7 @@ def calculate_ats_score(resume_path, job_description, skills, experience_years):
             'job_skills': set(),
             'contact_info': {}
         }
+
 def analyze_multiple_resumes(resume_paths, job_description, skills, experience_years):
     download_nltk_resources()
     results = {}
