@@ -1,6 +1,6 @@
 import streamlit as st
-import pandas as pd
 import io
+import xlsxwriter
 from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
@@ -43,44 +43,34 @@ if st.button("View Scores"):
         try:
             # Analyze resumes
             results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
-            
-            # Prepare data for CSV export
-            data = []
+
+            # Create an Excel file in memory
+            output = io.BytesIO()
+            workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+            worksheet = workbook.add_worksheet()
+
+            # Write headers
+            worksheet.write_row(0, 0, ['Resume Name', 'Final Score', 'Keyword Match Score', 'Resume Structure Score', 'Skill Match Score', 'Years of Experience', 'Contact Info'])
+
+            # Write data
+            row = 1
             for resume_name, scores in results.items():
                 if 'error' in scores:
-                    data.append({
-                        'Resume Name': resume_name,
-                        'Error': scores['error']
-                    })
+                    worksheet.write_row(row, 0, [resume_name, scores['error'], '', '', '', '', ''])
                 else:
-                    data.append({
-                        'Resume Name': resume_name,
-                        'Final Score': scores['final_score'],
-                        'Keyword Match Score': scores['keyword_score'],
-                        'Resume Structure Score': scores['structure_score'],
-                        'Skill Match Score': scores['skill_match_score'],
-                        'Years of Experience': scores['experience_years'],
-                        'Contact Info': scores['contact_info']
-                    })
-            
-            # Convert the data to a pandas DataFrame
-            df = pd.DataFrame(data)
+                    worksheet.write_row(row, 0, [resume_name, scores['final_score'], scores['keyword_score'], scores['structure_score'], scores['skill_match_score'], scores['experience_years'], scores['contact_info']])
+                row += 1
 
-            # Display the scores in the app
-            st.subheader("Resume Scores:")
-            st.write(df)
+            # Close the workbook and prepare data for download
+            workbook.close()
+            output.seek(0)
 
-            # Use BytesIO to store CSV data in memory
-            csv_buffer = io.BytesIO()
-            df.to_csv(csv_buffer, index=False)
-            csv_buffer.seek(0)  # Move cursor to the start of the BytesIO object
-
-            # Create download button for CSV
+            # Create download button for Excel
             st.download_button(
-                label="Download results as CSV",
-                data=csv_buffer,
-                file_name='resume_scores.csv',
-                mime='text/csv'
+                label="Download results as Excel",
+                data=output,
+                file_name='resume_scores.xlsx',
+                mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
 
         except Exception as e:
