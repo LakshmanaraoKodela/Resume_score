@@ -71,7 +71,27 @@ if st.button("View Scores"):
         
         try:
             results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
-        
+
+            # Convert results to DataFrame
+            csv_data = []
+            for resume_name, scores in results.items():
+                if 'error' not in scores:
+                    csv_data.append({
+                        'Resume Name': resume_name,
+                        'Final Score': scores['final_score'],
+                        'Keyword Match Score': scores['keyword_score'],
+                        'Resume Structure Score': scores['structure_score'],
+                        'Skill Match Score': scores['skill_match_score'],
+                        'Years of Experience': scores['experience_years'],
+                        'Contact Info': str(scores['contact_info']),
+                    })
+
+            df = pd.DataFrame(csv_data)
+
+            # Create a CSV file for download
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button("Download CSV", csv, "resume_scores.csv", "text/csv")
+
             st.subheader("Resume Scores:")
             for resume_name, scores in results.items():
                 st.write(f"### {resume_name}")
@@ -85,36 +105,7 @@ if st.button("View Scores"):
                     st.write(f"**Years of Experience:** {scores['experience_years']}")
                     st.write(f"**Contact Info:** {scores['contact_info']}")
                 st.write("---")
-
-            # Add CSV export functionality
-            if st.button("Download CSV"):
-                csv_data = []
-                for resume_name, scores in results.items():
-                    if 'error' in scores:
-                        continue  # Skip resumes with errors
-                    csv_data.append({
-                        "Resume Name": resume_name,
-                        "Final Score": scores['final_score'],
-                        "Keyword Match Score": scores['keyword_score'],
-                        "Resume Structure Score": scores['structure_score'],
-                        "Skill Match Score": scores['skill_match_score'],
-                        "Years of Experience": scores['experience_years'],
-                        "Contact Info": str(scores['contact_info'])  # Convert dict to string for CSV
-                    })
-
-                df = pd.DataFrame(csv_data)
-                csv_file = "resume_scores.csv"
-                df.to_csv(csv_file, index=False)
-
-                with open(csv_file, "rb") as f:
-                    st.download_button("Download CSV", f, file_name=csv_file)
-
         except Exception as e:
             st.error(f"An error occurred while processing the resumes: {str(e)}")
     else:
         st.error("Please fill in all fields and upload at least one resume.")
-
-
-
-
-
