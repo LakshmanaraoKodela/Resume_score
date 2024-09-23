@@ -1,22 +1,11 @@
 import streamlit as st
 import nltk
-from app import analyze_multiple_resumes
-
-def download_nltk_resources():
-    resources = ['punkt', 'averaged_perceptron_tagger', 'maxent_ne_chunker', 'words', 'stopwords']
-    for resource in resources:
-        try:
-            nltk.data.find(f'tokenizers/{resource}')
-        except LookupError:
-            with st.spinner(f'Downloading NLTK resource: {resource}...'):
-                nltk.download(resource, quiet=True)
+from app import analyze_multiple_resumes, download_nltk_resources
 
 # Download NLTK resources at the start of the app
 with st.spinner('Initializing NLTK resources...'):
     download_nltk_resources()
 st.success('NLTK resources initialized successfully!')
-
-st.title("Resume ATS Scoring Application")
 
 # Job Description input
 job_description = st.text_area("Enter Job Description", height=300)
