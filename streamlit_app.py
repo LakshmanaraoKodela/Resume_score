@@ -44,7 +44,7 @@ if st.button("View Scores"):
             # Analyze resumes
             results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
             
-            # Create a list to hold data
+            # Prepare data for CSV export
             data = []
             for resume_name, scores in results.items():
                 if 'error' in scores:
@@ -63,22 +63,22 @@ if st.button("View Scores"):
                         'Contact Info': scores['contact_info']
                     })
             
-            # Convert the list of dictionaries to DataFrame
+            # Convert the data to a pandas DataFrame
             df = pd.DataFrame(data)
 
             # Display the scores in the app
             st.subheader("Resume Scores:")
             st.write(df)
 
-            # Convert DataFrame to CSV using StringIO
-            csv_buffer = io.StringIO()
+            # Use BytesIO to store CSV data in memory
+            csv_buffer = io.BytesIO()
             df.to_csv(csv_buffer, index=False)
-            csv_data = csv_buffer.getvalue()
+            csv_buffer.seek(0)  # Move cursor to the start of the BytesIO object
 
-            # Create download button
+            # Create download button for CSV
             st.download_button(
                 label="Download results as CSV",
-                data=csv_data,
+                data=csv_buffer,
                 file_name='resume_scores.csv',
                 mime='text/csv'
             )
