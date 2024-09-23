@@ -170,3 +170,9 @@ def analyze_multiple_resumes(resume_paths, job_description, skills, experience_y
         except Exception as e:
             results[resume_name] = {'error': str(e)}
     return results
+
+def save_results_to_csv(results):
+    df = pd.DataFrame.from_dict(results, orient='index')
+    csv_file_path = "resume_scores.csv"
+    df.to_csv(csv_file_path)
+    return csv_file_path
