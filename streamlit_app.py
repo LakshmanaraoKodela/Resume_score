@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import io
 from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
@@ -43,7 +44,7 @@ if st.button("View Scores"):
             # Analyze resumes
             results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
             
-            # Create DataFrame for results
+            # Create a list to hold data
             data = []
             for resume_name, scores in results.items():
                 if 'error' in scores:
@@ -62,20 +63,22 @@ if st.button("View Scores"):
                         'Contact Info': scores['contact_info']
                     })
             
-            # Convert the list to DataFrame
+            # Convert the list of dictionaries to DataFrame
             df = pd.DataFrame(data)
 
-            # Display the scores
+            # Display the scores in the app
             st.subheader("Resume Scores:")
             st.write(df)
 
-            # Convert DataFrame to CSV
-            csv = df.to_csv(index=False)
+            # Convert DataFrame to CSV using StringIO
+            csv_buffer = io.StringIO()
+            df.to_csv(csv_buffer, index=False)
+            csv_data = csv_buffer.getvalue()
 
-            # Download button for CSV file
+            # Create download button
             st.download_button(
                 label="Download results as CSV",
-                data=csv,
+                data=csv_data,
                 file_name='resume_scores.csv',
                 mime='text/csv'
             )
