@@ -1,5 +1,8 @@
 import streamlit as st
-from app import analyze_multiple_resumes
+from app import analyze_multiple_resumes, download_nltk_resources
+
+# Download NLTK resources at the start of the app
+download_nltk_resources()
 
 st.title("Resume ATS Scoring Application")
 
@@ -29,18 +32,21 @@ if st.button("View Scores"):
             with open(uploaded_file.name, "wb") as f:
                 f.write(uploaded_file.getbuffer())
                 resume_paths.append(uploaded_file.name)
-
+        
         results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
         
         st.subheader("Resume Scores:")
         for resume_name, scores in results.items():
             st.write(f"### {resume_name}")
-            st.write(f"**Final Score:** {scores['final_score']:.2f}")
-            st.write(f"**Keyword Match Score:** {scores['keyword_score']:.2f}")
-            st.write(f"**Resume Structure Score:** {scores['structure_score']:.2f}")
-            st.write(f"**Skill Match Score:** {scores['skill_match_score']:.2f}")
-            st.write(f"**Years of Experience:** {scores['experience_years']}")
-            st.write(f"**Contact Info:** {scores['contact_info']}")
+            if 'error' in scores:
+                st.error(f"Error processing this resume: {scores['error']}")
+            else:
+                st.write(f"**Final Score:** {scores['final_score']:.2f}")
+                st.write(f"**Keyword Match Score:** {scores['keyword_score']:.2f}")
+                st.write(f"**Resume Structure Score:** {scores['structure_score']:.2f}")
+                st.write(f"**Skill Match Score:** {scores['skill_match_score']:.2f}")
+                st.write(f"**Years of Experience:** {scores['experience_years']}")
+                st.write(f"**Contact Info:** {scores['contact_info']}")
             st.write("---")
     else:
         st.error("Please fill in all fields and upload at least one resume.")
