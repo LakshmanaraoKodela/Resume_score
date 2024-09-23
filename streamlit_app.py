@@ -14,15 +14,14 @@ def styled_header(text, color="#4CAF50"):
 if 'page' not in st.session_state:
     st.session_state.page = "Home"
 
-# Callback function to update page
-def navigate_to(page):
-    st.session_state.page = page
-
 # Sidebar for app navigation
 st.sidebar.title("Navigation")
-st.sidebar.button("Home", on_click=navigate_to, args=("Home",))
-st.sidebar.button("Analyze Resumes", on_click=navigate_to, args=("Analyze Resumes",))
-st.sidebar.button("About", on_click=navigate_to, args=("About",))
+if st.sidebar.button("Home"):
+    st.session_state.page = "Home"
+if st.sidebar.button("Analyze Resumes"):
+    st.session_state.page = "Analyze Resumes"
+if st.sidebar.button("About"):
+    st.session_state.page = "About"
 
 # Main content based on the current page
 if st.session_state.page == "Home":
@@ -38,7 +37,9 @@ if st.session_state.page == "Home":
     st.success("Ready to analyze resumes!")
     
     # Call-to-action button
-    st.button("Start Analyzing", on_click=navigate_to, args=("Analyze Resumes",))
+    if st.button("Start Analyzing"):
+        st.session_state.page = "Analyze Resumes"
+        st.empty()  # Clear the current page content
 
 elif st.session_state.page == "Analyze Resumes":
     styled_header("ATS Score Analyzer")
@@ -77,10 +78,9 @@ elif st.session_state.page == "Analyze Resumes":
             with st.spinner('Analyzing resumes... Please wait.'):
                 resume_paths = []
                 for uploaded_file in uploaded_files:
-                    unique_filename = f"{time.time()}_{uploaded_file.name}"
-                    with open(unique_filename, "wb") as f:
+                    with open(uploaded_file.name, "wb") as f:
                         f.write(uploaded_file.getbuffer())
-                        resume_paths.append(unique_filename)
+                        resume_paths.append(uploaded_file.name)
                 
                 try:
                     results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
@@ -133,5 +133,3 @@ elif st.session_state.page == "About":
 # Footer
 st.markdown("---")
 st.markdown("© 2024 ATS Score Analyzer. All rights reserved.")
-
-
