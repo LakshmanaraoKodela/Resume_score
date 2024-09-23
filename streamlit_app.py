@@ -2,12 +2,13 @@ import streamlit as st
 import pandas as pd
 import base64
 from io import BytesIO
+import os
 from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
 st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
 
-# Custom CSS for styling
+# Custom CSS for styling (same as before)
 st.markdown("""
 <style>
     .main {
@@ -105,7 +106,13 @@ if st.button("Analyze Resumes"):
             df = pd.DataFrame.from_dict(results, orient='index')
             df = df.reset_index().rename(columns={'index': 'Resume Name'})
 
-            # Download button for CSV
+            # Save results to local CSV file
+            if st.button("Save Results to Local CSV"):
+                csv_file_path = "resume_scores.csv"
+                df.to_csv(csv_file_path, index=False)
+                st.success(f"Results saved to {os.path.abspath(csv_file_path)}")
+
+            # Download button for CSV (in-browser download)
             csv = df.to_csv(index=False)
             b64 = base64.b64encode(csv.encode()).decode()
             href = f'<a href="data:file/csv;base64,{b64}" download="resume_scores.csv" class="download-button">Download Results as CSV</a>'
