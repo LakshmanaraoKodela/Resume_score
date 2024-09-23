@@ -142,11 +142,14 @@ def calculate_ats_score(resume_path, job_description, skills, experience_years):
             'job_skills': set(),
             'contact_info': {}
         }
-
 def analyze_multiple_resumes(resume_paths, job_description, skills, experience_years):
+    download_nltk_resources()
     results = {}
     for resume_path in resume_paths:
-        resume_name = os.path.basename(resume_path)
-        scores = calculate_ats_score(resume_path, job_description, skills, experience_years)
-        results[resume_name] = scores
+        try:
+            resume_name = os.path.basename(resume_path)
+            scores = calculate_ats_score(resume_path, job_description, skills, experience_years)
+            results[resume_name] = scores
+        except Exception as e:
+            results[resume_name] = {'error': str(e)}
     return results
