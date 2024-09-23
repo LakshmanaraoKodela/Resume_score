@@ -1,9 +1,20 @@
 import streamlit as st
-import pandas as pd
 import base64
-from io import BytesIO
 import os
-from app import analyze_multiple_resumes, download_nltk_resources
+
+# Try importing pandas, and if it fails, provide an error message
+try:
+    import pandas as pd
+except ImportError:
+    st.error("Failed to import pandas. Please make sure it's installed correctly.")
+    st.stop()
+
+# Import custom functions, with error handling
+try:
+    from app import analyze_multiple_resumes, download_nltk_resources
+except ImportError:
+    st.error("Failed to import custom functions. Please make sure 'app.py' is in the same directory.")
+    st.stop()
 
 # Set page configuration
 st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
@@ -56,7 +67,11 @@ st.markdown('<h1 style="text-align: center; color: #4CAF50;">ATS Resume Analyzer
 
 # Download NLTK resources at the start of the app
 with st.spinner('Initializing NLTK resources...'):
-    download_nltk_resources()
+    try:
+        download_nltk_resources()
+    except Exception as e:
+        st.error(f"Failed to download NLTK resources: {str(e)}")
+        st.stop()
 
 # Create columns for input fields
 col1, col2 = st.columns(2)
