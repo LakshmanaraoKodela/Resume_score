@@ -6,3 +6,4 @@ nltk
 scikit-learn
 word2number
 pandas
+numpy
