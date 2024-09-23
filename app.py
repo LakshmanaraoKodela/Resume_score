@@ -8,9 +8,18 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from word2number import w2n
 
-# Download necessary NLTK data if not already done
-nltk.download('punkt', quiet=True)
-nltk.download('stopwords', quiet=True)
+# Function to download NLTK resources
+def download_nltk_resources():
+    try:
+        nltk.data.find('tokenizers/punkt')
+    except LookupError:
+        nltk.download('punkt', quiet=True)
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('stopwords', quiet=True)
+
+download_nltk_resources()
 
 def extract_text(file_path):
     _, file_extension = os.path.splitext(file_path)
