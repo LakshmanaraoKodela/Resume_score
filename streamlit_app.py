@@ -5,6 +5,9 @@ from app import analyze_multiple_resumes, download_nltk_resources
 # Set page configuration
 st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
 
+# Title
+st.markdown('<h1 style="text-align: center; color: #4CAF50;">ATS Score Analyzer!</h1>', unsafe_allow_html=True)
+
 # Download NLTK resources at the start of the app
 with st.spinner('Initializing NLTK resources...'):
     download_nltk_resources()
