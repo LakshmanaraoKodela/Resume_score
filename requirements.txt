@@ -5,3 +5,4 @@ textract
 nltk
 scikit-learn
 word2number
+pandas
