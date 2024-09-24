@@ -446,7 +446,8 @@
 
 import streamlit as st
 import nltk
-import pandas as pd  # Import pandas for CSV export
+import csv
+import io  # Import io to create a file-like object
 from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
@@ -508,8 +509,8 @@ elif options == 'Analyze Resume':
                 results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
                 st.subheader("Resume Scores:")
                 
-                # Prepare data for CSV export
-                scores_list = []
+                # Prepare CSV data
+                csv_data = "Resume Name,Final Score,Keyword Match Score,Resume Structure Score,Skill Match Score,Years of Experience,Contact Info\n"
                 
                 for resume_name, scores in results.items():
                     st.write(f"### {resume_name}")
@@ -523,30 +524,25 @@ elif options == 'Analyze Resume':
                         st.write(f"**Years of Experience:** {scores['experience_years']}")
                         st.write(f"**Contact Info:** {scores['contact_info']}")
 
-                        # Append scores to the list for CSV export
-                        scores_list.append({
-                            'Resume Name': resume_name,
-                            'Final Score': scores['final_score'],
-                            'Keyword Match Score': scores['keyword_score'],
-                            'Resume Structure Score': scores['structure_score'],
-                            'Skill Match Score': scores['skill_match_score'],
-                            'Years of Experience': scores['experience_years'],
-                            'Contact Info': scores['contact_info']
-                        })
+                        # Append scores to the CSV data string
+                        csv_data += f"{resume_name},{scores['final_score']:.2f},{scores['keyword_score']:.2f},{scores['structure_score']:.2f},{scores['skill_match_score']:.2f},{scores['experience_years']},{scores['contact_info']}\n"
                     
                     st.markdown("---")
-                
-                # Convert to DataFrame and create CSV
-                if scores_list:
-                    scores_df = pd.DataFrame(scores_list)
-                    csv = scores_df.to_csv(index=False).encode('utf-8')
+
+                # Create a download button for CSV
+                if csv_data:
+                    # Create a StringIO object to simulate a file
+                    output = io.StringIO()
+                    output.write(csv_data)
+                    output.seek(0)  # Move cursor to the start of the stream
+
                     st.download_button(
                         label="Download Scores as CSV",
-                        data=csv,
+                        data=output.getvalue(),
                         file_name='resume_scores.csv',
                         mime='text/csv',
                     )
-                    
+
             except Exception as e:
                 st.error(f"An error occurred while processing the resumes: {str(e)}")
         else:
@@ -568,4 +564,3 @@ elif options == 'About':
         The **Analyze Resume** section allows you to upload multiple resumes and view a detailed breakdown of their scores. You can use this information to make more informed hiring decisions.
     """)
     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
-
