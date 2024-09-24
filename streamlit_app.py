@@ -345,8 +345,107 @@
 #     """)
 #     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
 #--------------------------------------------------------------------------------
+# import streamlit as st
+# import nltk
+# from app import analyze_multiple_resumes, download_nltk_resources
+
+# # Set page configuration
+# st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
+
+# # Sidebar Navigation
+# st.sidebar.title("Navigation")
+# options = st.sidebar.radio("Go to", ['Home', 'Analyze Resume', 'About'])
+
+# # NLTK resource initialization
+# with st.spinner('Initializing NLP resources...'):
+#     download_nltk_resources()
+
+# # Home Page
+# if options == 'Home':
+#     st.markdown('<h1 style="text-align: center; color: #4CAF50;">ATS Score Analyzer</h1>', unsafe_allow_html=True)
+#     st.write("""
+#         Welcome to the **ATS Resume Analyzer**! This application helps recruiters assess resumes based on how well they match a given job description, considering factors such as:
+#         - Keyword matches
+#         - Skills alignment
+#         - Years of experience
+#         - Resume structure and contact information
+        
+#         Use the **Analyze Resume** section to upload resumes and view their ATS scores. You can also learn more about how the app works in the **About** section.
+#     """)
+#     st.image("https://www.example.com/welcome_image.png", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
+
+# # Analyze Resume Page (Main Functionality)
+# elif options == 'Analyze Resume':
+#     st.markdown('<h2 style="text-align: center; color: #4CAF50;">Analyze Resumes</h2>', unsafe_allow_html=True)
+    
+#     # Job Description input
+#     job_description = st.text_area("Enter Job Description", height=300, placeholder="Paste the job description here...")
+#     if job_description:
+#         st.subheader("Job Description Preview:")
+#         st.info(job_description)
+
+#     # Skills input
+#     skills = st.text_input("Enter Skills (comma-separated)", placeholder="e.g., Python, SQL, Machine Learning")
+#     if skills:
+#         skills = [skill.strip() for skill in skills.split(",")]
+#         st.subheader("Skills Preview:")
+#         st.write(", ".join(skills))
+
+#     # Experience input
+#     experience_years = st.number_input("Enter Required Experience (in years)", min_value=0)
+
+#     # File upload
+#     uploaded_files = st.file_uploader("Upload Resumes (PDF or DOCX)", type=["pdf", "docx"], accept_multiple_files=True)
+
+#     if st.button("Analyze Resumes"):
+#         if job_description and skills and experience_years > 0 and uploaded_files:
+#             resume_paths = []
+#             for uploaded_file in uploaded_files:
+#                 with open(uploaded_file.name, "wb") as f:
+#                     f.write(uploaded_file.getbuffer())
+#                     resume_paths.append(uploaded_file.name)
+#             try:
+#                 results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
+#                 st.subheader("Resume Scores:")
+#                 for resume_name, scores in results.items():
+#                     st.write(f"### {resume_name}")
+#                     if 'error' in scores:
+#                         st.error(f"Error processing this resume: {scores['error']}")
+#                     else:
+#                         st.write(f"**Final Score:** {scores['final_score']:.2f}")
+#                         st.write(f"**Keyword Match Score:** {scores['keyword_score']:.2f}")
+#                         st.write(f"**Resume Structure Score:** {scores['structure_score']:.2f}")
+#                         st.write(f"**Skill Match Score:** {scores['skill_match_score']:.2f}")
+#                         st.write(f"**Years of Experience:** {scores['experience_years']}")
+#                         st.write(f"**Contact Info:** {scores['contact_info']}")
+#                     st.markdown("---")
+#             except Exception as e:
+#                 st.error(f"An error occurred while processing the resumes: {str(e)}")
+#         else:
+#             st.error("Please fill in all fields and upload at least one resume.")
+
+# # About Page
+# elif options == 'About':
+#     st.markdown('<h2 style="text-align: center; color: #4CAF50;">About ATS Resume Analyzer</h2>', unsafe_allow_html=True)
+#     st.write("""
+#         **ATS Resume Analyzer** is a tool designed to help recruiters streamline the resume evaluation process. 
+#         The tool calculates scores based on:
+#         - Keyword matches between resumes and job descriptions
+#         - The relevance of skills
+#         - Years of experience
+#         - Resume structure and completeness
+
+#         This tool leverages natural language processing (NLP) techniques to understand the contents of resumes and job descriptions, providing recruiters with a data-driven way to assess candidate fit.
+        
+#         The **Analyze Resume** section allows you to upload multiple resumes and view a detailed breakdown of their scores. You can use this information to make more informed hiring decisions.
+#     """)
+#     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
+
+# error no
+#------------------------
 import streamlit as st
 import nltk
+import tempfile
 from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
@@ -401,9 +500,11 @@ elif options == 'Analyze Resume':
         if job_description and skills and experience_years > 0 and uploaded_files:
             resume_paths = []
             for uploaded_file in uploaded_files:
-                with open(uploaded_file.name, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                    resume_paths.append(uploaded_file.name)
+                # Use a temporary file instead of saving it permanently
+                with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                    temp_file.write(uploaded_file.getbuffer())
+                    resume_paths.append(temp_file.name)
+
             try:
                 results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
                 st.subheader("Resume Scores:")
@@ -419,6 +520,7 @@ elif options == 'Analyze Resume':
                         st.write(f"**Years of Experience:** {scores['experience_years']}")
                         st.write(f"**Contact Info:** {scores['contact_info']}")
                     st.markdown("---")
+                st.success("Analysis complete!")
             except Exception as e:
                 st.error(f"An error occurred while processing the resumes: {str(e)}")
         else:
@@ -440,4 +542,3 @@ elif options == 'About':
         The **Analyze Resume** section allows you to upload multiple resumes and view a detailed breakdown of their scores. You can use this information to make more informed hiring decisions.
     """)
     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
-
