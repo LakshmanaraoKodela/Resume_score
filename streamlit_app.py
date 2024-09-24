@@ -462,18 +462,16 @@ with st.spinner('Initializing NLP resources...'):
     download_nltk_resources()
 
 # Home Page
-if options == 'Home':
-    st.markdown('<h1 style="text-align: center; color: #4CAF50;">ATS Score Analyzer</h1>', unsafe_allow_html=True)
-    st.write("""
-        Welcome to the **ATS Resume Analyzer**! This application helps recruiters assess resumes based on how well they match a given job description, considering factors such as:
-        - Keyword matches
-        - Skills alignment
-        - Years of experience
-        - Resume structure and contact information
-        
-        Use the **Analyze Resume** section to upload resumes and view their ATS scores. You can also learn more about how the app works in the **About** section.
-    """)
-    st.image("https://www.example.com/welcome_image.png", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
+# Main content based on the current page
+if st.session_state.page == "Home":
+    styled_header("Welcome to ATS Score Analyzer!")
+    st.write("Optimize your hiring process with our advanced ATS Resume Analyzer.")
+    # Animated progress bar
+    progress_bar = st.progress(0)
+    for percent_complete in range(100):
+        time.sleep(0.01)
+        progress_bar.progress(percent_complete + 1)
+    st.success("Ready to analyze resumes!")
 
 # Analyze Resume Page (Main Functionality)
 elif options == 'Analyze Resume':
