@@ -568,29 +568,26 @@
 import streamlit as st
 import nltk
 import csv
-import io
+import io  # Import io to create a file-like object
 from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
 st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
 
-# Initialize session state for page navigation
-if "navigation" not in st.session_state:
-    st.session_state.navigation = 'Home'
+# Sidebar Navigation with session state management for navigation
+if "page" not in st.session_state:
+    st.session_state.page = 'Home'  # Set default page to Home
 
 # Sidebar Navigation
 st.sidebar.title("Navigation")
-options = st.sidebar.radio("Go to", ['Home', 'Analyze Resume', 'About'])
-
-# Update session state based on sidebar selection
-st.session_state.navigation = options
+options = st.sidebar.radio("Go to", ['Home', 'Analyze Resume', 'About'], index=['Home', 'Analyze Resume', 'About'].index(st.session_state.page))
 
 # NLTK resource initialization
 with st.spinner('Initializing NLP resources...'):
     download_nltk_resources()
 
 # Home Page
-if st.session_state.navigation == 'Home':
+if options == 'Home':
     st.markdown('<h1 style="text-align: center; color: #4CAF50;">ATS Score Analyzer</h1>', unsafe_allow_html=True)
     st.write("""
         Welcome to the **ATS Resume Analyzer**! This application helps recruiters assess resumes based on how well they match a given job description, considering factors such as:
@@ -602,14 +599,14 @@ if st.session_state.navigation == 'Home':
         Use the **Analyze Resume** section to upload resumes and view their ATS scores. You can also learn more about how the app works in the **About** section.
     """)
     st.image("https://www.example.com/welcome_image.png", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
-    
-    # Button to navigate to "Analyze Resume" section
-    if st.button("Go to Analyze Resume"):
-        # Update the navigation state to switch to the 'Analyze Resume' page
-        st.session_state.navigation = 'Analyze Resume'
+
+    # Button to navigate to Analyze Resume page
+    if st.button('Go to Analyze Resume'):
+        st.session_state.page = 'Analyze Resume'  # Set the page to Analyze Resume
+        st.experimental_rerun()  # Rerun the app to trigger navigation
 
 # Analyze Resume Page (Main Functionality)
-elif st.session_state.navigation == 'Analyze Resume':
+elif options == 'Analyze Resume':
     st.markdown('<h2 style="text-align: center; color: #4CAF50;">Analyze Resumes</h2>', unsafe_allow_html=True)
     
     # Job Description input
@@ -682,7 +679,7 @@ elif st.session_state.navigation == 'Analyze Resume':
             st.error("Please fill in all fields and upload at least one resume.")
 
 # About Page
-elif st.session_state.navigation == 'About':
+elif options == 'About':
     st.markdown('<h2 style="text-align: center; color: #4CAF50;">About ATS Resume Analyzer</h2>', unsafe_allow_html=True)
     st.write("""
         **ATS Resume Analyzer** is a tool designed to help recruiters streamline the resume evaluation process. 
@@ -696,4 +693,4 @@ elif st.session_state.navigation == 'About':
         
         The **Analyze Resume** section allows you to upload multiple resumes and view a detailed breakdown of their scores. You can use this information to make more informed hiring decisions.
     """)
-    st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
+    st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process with ATS Resume Analyzer")
