@@ -249,7 +249,6 @@
 
 
 #-----------------------------------------------------------------------------------------------------------
-
 import streamlit as st
 import nltk
 from app import analyze_multiple_resumes, download_nltk_resources
@@ -259,29 +258,35 @@ st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
 
 # Sidebar Navigation
 st.sidebar.title("Navigation")
-options = st.sidebar.radio("Go to", ['Home', 'Job Description', 'Upload Resumes', 'View Scores'])
+options = st.sidebar.radio("Go to", ['Home', 'Analyze Resume', 'About'])
 
-# NLTK resource initialization at app start
+# NLTK resource initialization
+with st.spinner('Initializing NLP resources...'):
+    download_nltk_resources()
+
+# Home Page
 if options == 'Home':
     st.markdown('<h1 style="text-align: center; color: #4CAF50;">ATS Score Analyzer</h1>', unsafe_allow_html=True)
-    st.write("Welcome to the ATS Resume Analyzer! This tool helps recruiters match resumes with job descriptions "
-             "and calculate a score based on various factors such as keyword matches, skills, and experience. "
-             "Use the navigation menu to enter job descriptions, upload resumes, and view the results.")
+    st.write("""
+        Welcome to the **ATS Resume Analyzer**! This application helps recruiters assess resumes based on how well they match a given job description, considering factors such as:
+        - Keyword matches
+        - Skills alignment
+        - Years of experience
+        - Resume structure and contact information
+        
+        Use the **Analyze Resume** section to upload resumes and view their ATS scores. You can also learn more about how the app works in the **About** section.
+    """)
+    st.image("https://www.example.com/welcome_image.png", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
 
-    with st.spinner('Initializing NLP resources...'):
-        download_nltk_resources()
-    st.success('NLP resources initialized successfully!')
-
-elif options == 'Job Description':
-    st.header("Job Description Input")
+# Analyze Resume Page (Main Functionality)
+elif options == 'Analyze Resume':
+    st.markdown('<h2 style="text-align: center; color: #4CAF50;">Analyze Resumes</h2>', unsafe_allow_html=True)
+    
+    # Job Description input
     job_description = st.text_area("Enter Job Description", height=300, placeholder="Paste the job description here...")
     if job_description:
         st.subheader("Job Description Preview:")
         st.info(job_description)
-        st.session_state.job_description = job_description  # Store in session state for reuse
-
-elif options == 'Upload Resumes':
-    st.header("Upload Resumes and Enter Details")
 
     # Skills input
     skills = st.text_input("Enter Skills (comma-separated)", placeholder="e.g., Python, SQL, Machine Learning")
@@ -289,29 +294,15 @@ elif options == 'Upload Resumes':
         skills = [skill.strip() for skill in skills.split(",")]
         st.subheader("Skills Preview:")
         st.write(", ".join(skills))
-        st.session_state.skills = skills
 
     # Experience input
     experience_years = st.number_input("Enter Required Experience (in years)", min_value=0)
-    st.session_state.experience_years = experience_years
 
     # File upload
     uploaded_files = st.file_uploader("Upload Resumes (PDF or DOCX)", type=["pdf", "docx"], accept_multiple_files=True)
-    if uploaded_files:
-        st.session_state.uploaded_files = uploaded_files
-        st.success(f"{len(uploaded_files)} file(s) uploaded.")
 
-elif options == 'View Scores':
-    st.header("ATS Score Results")
-    # Ensure all inputs are present
-    if 'job_description' in st.session_state and 'skills' in st.session_state and \
-            'experience_years' in st.session_state and 'uploaded_files' in st.session_state:
-        job_description = st.session_state.job_description
-        skills = st.session_state.skills
-        experience_years = st.session_state.experience_years
-        uploaded_files = st.session_state.uploaded_files
-
-        if st.button("Calculate Scores"):
+    if st.button("Analyze Resumes"):
+        if job_description and skills and experience_years > 0 and uploaded_files:
             resume_paths = []
             for uploaded_file in uploaded_files:
                 with open(uploaded_file.name, "wb") as f:
@@ -334,6 +325,22 @@ elif options == 'View Scores':
                     st.markdown("---")
             except Exception as e:
                 st.error(f"An error occurred while processing the resumes: {str(e)}")
-    else:
-        st.error("Please ensure all required information is filled out before calculating scores.")
+        else:
+            st.error("Please fill in all fields and upload at least one resume.")
 
+# About Page
+elif options == 'About':
+    st.markdown('<h2 style="text-align: center; color: #4CAF50;">About ATS Resume Analyzer</h2>', unsafe_allow_html=True)
+    st.write("""
+        **ATS Resume Analyzer** is a tool designed to help recruiters streamline the resume evaluation process. 
+        The tool calculates scores based on:
+        - Keyword matches between resumes and job descriptions
+        - The relevance of skills
+        - Years of experience
+        - Resume structure and completeness
+
+        This tool leverages natural language processing (NLP) techniques to understand the contents of resumes and job descriptions, providing recruiters with a data-driven way to assess candidate fit.
+        
+        The **Analyze Resume** section allows you to upload multiple resumes and view a detailed breakdown of their scores. You can use this information to make more informed hiring decisions.
+    """)
+    st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
