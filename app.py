@@ -4,6 +4,7 @@ import PyPDF2
 import docx
 import textract
 import nltk
+import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from word2number import w2n
