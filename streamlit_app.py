@@ -565,7 +565,6 @@
 #     """)
 #     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
 #=----------------------------------
-
 import streamlit as st
 import nltk
 import csv
@@ -606,8 +605,8 @@ if st.session_state.navigation == 'Home':
     
     # Button to navigate to "Analyze Resume" section
     if st.button("Go to Analyze Resume"):
+        # Update the navigation state to switch to the 'Analyze Resume' page
         st.session_state.navigation = 'Analyze Resume'
-        st.experimental_rerun()
 
 # Analyze Resume Page (Main Functionality)
 elif st.session_state.navigation == 'Analyze Resume':
@@ -698,4 +697,3 @@ elif st.session_state.navigation == 'About':
         The **Analyze Resume** section allows you to upload multiple resumes and view a detailed breakdown of their scores. You can use this information to make more informed hiring decisions.
     """)
     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
-
