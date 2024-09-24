@@ -9,6 +9,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from word2number import w2n
 from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
 
 def download_nltk_resources():
     resources = ['punkt', 'averaged_perceptron_tagger', 'maxent_ne_chunker', 'words', 'stopwords', 'punkt_tab']
@@ -161,7 +162,6 @@ def calculate_ats_score(resume_path, job_description, skills, experience_years):
         }
 
 def analyze_multiple_resumes(resume_paths, job_description, skills, experience_years):
-    download_nltk_resources()
     results = {}
     for resume_path in resume_paths:
         try:
@@ -169,7 +169,7 @@ def analyze_multiple_resumes(resume_paths, job_description, skills, experience_y
             scores = calculate_ats_score(resume_path, job_description, skills, experience_years)
             results[resume_name] = scores
         except Exception as e:
-            results[resume_name] = {'error': str(e)}
+            results[resume_name] = {'error': f"{type(e).__name__}: {str(e)}"}
     return results
 
 def save_results_to_csv(results):
