@@ -600,6 +600,7 @@ if page == "Home":
 
         Use the **Analyze Resume** section to start uploading resumes and viewing ATS scores. Explore how the app works in the **About** section.
     """)
+    st.success("Ready to analyze resumes!")
     st.image("https://www.example.com/welcome_image.png", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
 
 # Analyze Resume Page
@@ -685,5 +686,7 @@ elif page == "About":
         - Skill and experience assessment
         - Resume structure analysis
     """)
+    # Add a fun fact or tip
+    st.info("💡 Did you know? On average, recruiters spend only 7.4 seconds looking at a resume!")
     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
 
