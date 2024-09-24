@@ -600,6 +600,7 @@ if page == "Home":
 
         Use the **Analyze Resume** section to start uploading resumes and viewing ATS scores. Explore how the app works in the **About** section.
     """)
+    st.image("https://www.example.com/welcome_image.png", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
     st.success("Ready to analyze resumes!")", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
 
 # Analyze Resume Page
