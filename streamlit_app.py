@@ -565,69 +565,82 @@
 #     """)
 #     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
 #=----------------------------------
+
+import csv
 import streamlit as st
 import nltk
-import csv
-import io  # Import io to create a file-like object
 from app import analyze_multiple_resumes, download_nltk_resources
+import time
+import io
 
 # Set page configuration
-st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
+st.set_page_config(page_title="ATS Resume Analyzer", layout="wide", initial_sidebar_state="expanded")
 
-# Sidebar Navigation with session state management for navigation
-if "page" not in st.session_state:
-    st.session_state.page = 'Home'  # Set default page to Home
+# Custom function for a styled header
+def styled_header(text, color="#4CAF50"):
+    st.markdown(f'<h1 style="text-align: center; color: {color};">{text}</h1>', unsafe_allow_html=True)
 
-# Sidebar Navigation
+# Initialize session state for navigation
+if 'page' not in st.session_state:
+    st.session_state.page = "Home"
+
+# Callback function to update page
+def navigate_to(page):
+    st.session_state.page = page
+
+# Sidebar for app navigation
 st.sidebar.title("Navigation")
-options = st.sidebar.radio("Go to", ['Home', 'Analyze Resume', 'About'], index=['Home', 'Analyze Resume', 'About'].index(st.session_state.page))
+st.sidebar.button("Home", on_click=navigate_to, args=("Home",))
+st.sidebar.button("Analyze Resumes", on_click=navigate_to, args=("Analyze Resumes",))
+st.sidebar.button("About", on_click=navigate_to, args=("About",))
 
-# NLTK resource initialization
-with st.spinner('Initializing NLP resources...'):
-    download_nltk_resources()
-
-# Home Page
-if options == 'Home':
-    st.markdown('<h1 style="text-align: center; color: #4CAF50;">ATS Score Analyzer</h1>', unsafe_allow_html=True)
-    st.write("""
-        Welcome to the **ATS Resume Analyzer**! This application helps recruiters assess resumes based on how well they match a given job description, considering factors such as:
-        - Keyword matches
-        - Skills alignment
-        - Years of experience
-        - Resume structure and contact information
-        
-        Use the **Analyze Resume** section to upload resumes and view their ATS scores. You can also learn more about how the app works in the **About** section.
-    """)
-    st.image("https://www.example.com/welcome_image.png", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
-
-    # Button to navigate to Analyze Resume page
-    if st.button('Go to Analyze Resume'):
-        st.session_state.page = 'Analyze Resume'  # Set the page to Analyze Resume
-        st.experimental_rerun()  # Rerun the app to trigger navigation
-
-# Analyze Resume Page (Main Functionality)
-elif options == 'Analyze Resume':
-    st.markdown('<h2 style="text-align: center; color: #4CAF50;">Analyze Resumes</h2>', unsafe_allow_html=True)
+# Main content based on the current page
+if st.session_state.page == "Home":
+    styled_header("Welcome to ATS Score Analyzer!")
+    st.write("Optimize your hiring process with our advanced ATS Resume Analyzer.")
     
-    # Job Description input
-    job_description = st.text_area("Enter Job Description", height=300, placeholder="Paste the job description here...")
-    if job_description:
-        st.subheader("Job Description Preview:")
-        st.info(job_description)
+    # Animated progress bar
+    progress_bar = st.progress(0)
+    for percent_complete in range(100):
+        time.sleep(0.01)
+        progress_bar.progress(percent_complete + 1)
+    st.success("Ready to analyze resumes!")
+    
+    # Call-to-action button
+    st.button("Start Analyzing", on_click=navigate_to, args=("Analyze Resumes",))
 
-    # Skills input
-    skills = st.text_input("Enter Skills (comma-separated)", placeholder="e.g., Python, SQL, Machine Learning")
+elif st.session_state.page == "Analyze Resumes":
+    styled_header("ATS Score Analyzer")
+
+    # Download NLTK resources
+    with st.spinner('Initializing NLTK resources...'):
+        download_nltk_resources()
+
+    # Job Description input with expandable section
+    with st.expander("Job Description", expanded=True):
+        job_description = st.text_area("Enter Job Description", height=200)
+        if job_description:
+            st.info("Job Description Preview:")
+            st.write(job_description)
+
+    # Skills input with chips
+    skills = st.text_input("Enter Required Skills (comma-separated)")
     if skills:
         skills = [skill.strip() for skill in skills.split(",")]
-        st.subheader("Skills Preview:")
-        st.write(", ".join(skills))
+        st.write("Skills Required:")
+        for skill in skills:
+            st.markdown(f'<span style="background-color: #e0e0e0; padding: 5px 10px; border-radius: 20px; margin-right: 5px;">{skill}</span>', unsafe_allow_html=True)
 
-    # Experience input
-    experience_years = st.number_input("Enter Required Experience (in years)", min_value=0)
+    # Experience input with slider
+    experience_years = st.slider("Required Experience (in years)", 0, 20, 2)
+    st.write(f"Looking for candidates with {experience_years} years of experience")
 
-    # File upload
-    uploaded_files = st.file_uploader("Upload Resumes (PDF or DOCX)", type=["pdf", "docx"], accept_multiple_files=True)
+    # File upload with drag and drop
+    uploaded_files = st.file_uploader("Upload Resumes", type=["pdf", "docx"], accept_multiple_files=True)
+    if uploaded_files:
+        st.success(f"{len(uploaded_files)} resume(s) uploaded successfully!")
 
+    # Analysis button with loading animation
     if st.button("Analyze Resumes"):
         if job_description and skills and experience_years > 0 and uploaded_files:
             resume_paths = []
@@ -678,19 +691,23 @@ elif options == 'Analyze Resume':
         else:
             st.error("Please fill in all fields and upload at least one resume.")
 
-# About Page
-elif options == 'About':
-    st.markdown('<h2 style="text-align: center; color: #4CAF50;">About ATS Resume Analyzer</h2>', unsafe_allow_html=True)
+elif st.session_state.page == "About":
+    styled_header("About ATS Score Analyzer")
     st.write("""
-        **ATS Resume Analyzer** is a tool designed to help recruiters streamline the resume evaluation process. 
-        The tool calculates scores based on:
-        - Keyword matches between resumes and job descriptions
-        - The relevance of skills
-        - Years of experience
-        - Resume structure and completeness
-
-        This tool leverages natural language processing (NLP) techniques to understand the contents of resumes and job descriptions, providing recruiters with a data-driven way to assess candidate fit.
-        
-        The **Analyze Resume** section allows you to upload multiple resumes and view a detailed breakdown of their scores. You can use this information to make more informed hiring decisions.
+    Our ATS Score Analyzer is a cutting-edge tool designed to streamline your hiring process. 
+    By leveraging advanced natural language processing techniques, we provide comprehensive 
+    insights into each resume, helping you identify the best candidates quickly and efficiently.
+    Key Features:
+    - Automated resume scoring
+    - Keyword matching
+    - Skills assessment
+    - Experience verification
+    - Resume structure analysis
+    Start optimizing your recruitment process today!
     """)
-    st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process with ATS Resume Analyzer")
+    # Add a fun fact or tip
+    st.info("💡 Did you know? On average, recruiters spend only 7.4 seconds looking at a resume!")
+
+# Footer
+st.markdown("---")
+st.markdown("© 2024 ATS Score Analyzer. All rights reserved.")
