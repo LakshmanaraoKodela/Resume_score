@@ -345,7 +345,6 @@
 #     """)
 #     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
 #--------------------------------------------------------------------------------
-
 import streamlit as st
 import nltk
 from app import analyze_multiple_resumes, download_nltk_resources
@@ -353,13 +352,17 @@ from app import analyze_multiple_resumes, download_nltk_resources
 # Set page configuration
 st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
 
+# Initialize session state for navigation
+if 'navigation' not in st.session_state:
+    st.session_state['navigation'] = 'Home'  # Default navigation to Home
+
 # Sidebar Navigation
 st.sidebar.title("Navigation")
-options = st.sidebar.radio("Go to", ['Home', 'Analyze Resume', 'About'])
+options = st.sidebar.radio("Go to", ['Home', 'Analyze Resume', 'About'], index=['Home', 'Analyze Resume', 'About'].index(st.session_state['navigation']))
 
-# NLTK resource initialization
-with st.spinner('Initializing NLP resources...'):
-    download_nltk_resources()
+# Function to navigate to Analyze Resume when button is clicked
+def navigate_to_analyze():
+    st.session_state['navigation'] = 'Analyze Resume'
 
 # Home Page
 if options == 'Home':
@@ -376,12 +379,12 @@ if options == 'Home':
 
     # Add button to navigate to "Analyze Resume" section
     if st.button("Analyze Resume Now"):
-        st.session_state['options'] = 'Analyze Resume'
-    
+        navigate_to_analyze()
+
     st.image("https://www.example.com/welcome_image.png", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
 
 # Analyze Resume Page (Main Functionality)
-if options == 'Analyze Resume' or st.session_state.get('options') == 'Analyze Resume':
+if options == 'Analyze Resume' or st.session_state['navigation'] == 'Analyze Resume':
     st.markdown('<h2 style="text-align: center; color: #4CAF50;">Analyze Resumes</h2>', unsafe_allow_html=True)
     
     # Job Description input
