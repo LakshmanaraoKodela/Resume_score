@@ -537,4 +537,3 @@ elif options == 'About':
         The **Analyze Resume** section allows you to upload multiple resumes and view a detailed breakdown of their scores. You can use this information to make more informed hiring decisions.
     """)
     st.image("https://images.unsplash.com/photo-1517430816045-df4b7de01f46", caption="Streamline your hiring process", use_column_width=True)
-
