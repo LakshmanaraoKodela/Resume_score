@@ -567,296 +567,129 @@
 #     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
 #---------------------------
 # finnnnaajnj
-# import streamlit as st
-# import nltk
-# import io
-# import csv
-# from app import analyze_multiple_resumes, download_nltk_resources
-
-# # Set page configuration
-# st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
-
-# # Sidebar Navigation
-# st.sidebar.title("Navigation")
-# page = st.sidebar.radio("Go to", ["Home", "Analyze Resume", "About"])
-
-# # Download NLTK resources
-# with st.spinner("Initializing NLP resources..."):
-#     download_nltk_resources()
-
-# # Custom header function for styled text
-# def styled_header(text, color="#4CAF50"):
-#     st.markdown(f'<h1 style="text-align: center; color: {color};">{text}</h1>', unsafe_allow_html=True)
-
-# # Home Page
-# if page == "Home":
-#     styled_header("ATS Score Analyzer")
-#     st.write("""
-#         Welcome to the **ATS Resume Analyzer**! This business tool helps recruiters analyze resumes by matching them against job descriptions. It scores resumes based on:
-#         - Keyword matches
-#         - Skill relevance
-#         - Years of experience
-#         - Resume structure and completeness
-
-#         Use the **Analyze Resume** section to start uploading resumes and viewing ATS scores. Explore how the app works in the **About** section.
-#     """)
-#     st.image("https://www.example.com/welcome_image.png", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
-#     st.success("Ready to analyze resumes!")
-
-
-# # Analyze Resume Page
-# elif page == "Analyze Resume":
-#     styled_header("Analyze Resumes")
-    
-#     # Job Description input
-#     job_description = st.text_area("Enter Job Description", height=300, placeholder="Paste the job description here...")
-#     if job_description:
-#         st.subheader("Job Description Preview:")
-#         st.info(job_description)
-
-#     # Skills input with validation
-#     skills = st.text_input("Enter Skills (comma-separated)", placeholder="e.g., Python, SQL, Machine Learning")
-#     if skills:
-#         skills = [skill.strip() for skill in skills.split(",")]
-#         st.subheader("Skills Preview:")
-#         st.write(", ".join(skills))
-
-#     # Experience input
-#     experience_years = st.number_input("Enter Required Experience (in years)", min_value=0, value=1)
-
-#     # File upload with multi-file support
-#     uploaded_files = st.file_uploader("Upload Resumes (PDF or DOCX)", type=["pdf", "docx"], accept_multiple_files=True)
-
-#     if st.button("Analyze Resumes"):
-#         if job_description and skills and experience_years > 0 and uploaded_files:
-#             resume_paths = []
-#             for uploaded_file in uploaded_files:
-#                 with open(uploaded_file.name, "wb") as f:
-#                     f.write(uploaded_file.getbuffer())
-#                     resume_paths.append(uploaded_file.name)
-
-#             try:
-#                 results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
-#                 st.subheader("Resume Scores:")
-                
-#                 csv_data = "Resume Name,Final Score,Keyword Match Score,Resume Structure Score,Skill Match Score,Years of Experience,Contact Info\n"
-                
-#                 for resume_name, scores in results.items():
-#                     st.write(f"### {resume_name}")
-#                     if 'error' in scores:
-#                         st.error(f"Error processing resume: {scores['error']}")
-#                     else:
-#                         # Detailed score breakdown
-#                         st.write(f"**Final Score:** {scores['final_score']:.2f}")
-#                         st.write(f"**Keyword Match Score:** {scores['keyword_score']:.2f}")
-#                         st.write(f"**Skill Match Score:** {scores['skill_match_score']:.2f}")
-#                         st.write(f"**Years of Experience:** {scores['experience_years']}")
-#                         st.write(f"**Contact Info:** {scores['contact_info']}")
-
-#                         csv_data += f"{resume_name},{scores['final_score']:.2f},{scores['keyword_score']:.2f},{scores['structure_score']:.2f},{scores['skill_match_score']:.2f},{scores['experience_years']},{scores['contact_info']}\n"
-
-#                     st.markdown("---")
-
-#                 # CSV Download
-#                 if csv_data:
-#                     output = io.StringIO()
-#                     output.write(csv_data)
-#                     output.seek(0)
-
-#                     st.download_button(
-#                         label="Download Scores as CSV",
-#                         data=output.getvalue(),
-#                         file_name="resume_scores.csv",
-#                         mime="text/csv"
-#                     )
-
-#             except Exception as e:
-#                 st.error(f"An error occurred: {str(e)}")
-#         else:
-#             st.error("Please fill in all fields and upload resumes.")
-
-# # About Page
-# elif page == "About":
-#     styled_header("About ATS Resume Analyzer")
-#     st.write("""
-#         **ATS Resume Analyzer** is built for recruiters to streamline the resume screening process. 
-#         It uses natural language processing to score resumes based on keyword matches, skills, and experience, providing a structured way to evaluate candidate fit.
-        
-#         Key features:
-#         - Automated resume scoring based on job descriptions
-#         - Skill and experience assessment
-#         - Resume structure analysis
-#     """)
-#     # Add a fun fact or tip
-#     st.info("💡 Did you know? On average, recruiters spend only 7.4 seconds looking at a resume!")
-#     st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
-
-
-#---------------------------------
-
 import streamlit as st
 import nltk
 import io
 import csv
-import pandas as pd
-import plotly.express as px
 from app import analyze_multiple_resumes, download_nltk_resources
 
 # Set page configuration
-st.set_page_config(page_title="Advanced ATS Resume Analyzer", layout="wide")
+st.set_page_config(page_title="ATS Resume Analyzer", layout="wide")
+
+# Sidebar Navigation
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["Home", "Analyze Resume", "About"])
 
 # Download NLTK resources
-@st.cache_resource
-def load_nltk_resources():
+with st.spinner("Initializing NLP resources..."):
     download_nltk_resources()
-
-load_nltk_resources()
 
 # Custom header function for styled text
 def styled_header(text, color="#4CAF50"):
     st.markdown(f'<h1 style="text-align: center; color: {color};">{text}</h1>', unsafe_allow_html=True)
 
-# Sidebar Navigation
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Analyze Resumes", "Candidate Comparison", "Settings", "About"])
-
 # Home Page
 if page == "Home":
-    styled_header("Advanced ATS Resume Analyzer")
+    styled_header("ATS Score Analyzer")
     st.write("""
-        Welcome to the **Advanced ATS Resume Analyzer**! This powerful tool helps recruiters streamline their hiring process by:
-        - Analyzing resumes against job descriptions
-        - Providing detailed scoring on various aspects
-        - Offering candidate comparisons and visualizations
-        - Customizable scoring weights and criteria
+        Welcome to the **ATS Resume Analyzer**! This business tool helps recruiters analyze resumes by matching them against job descriptions. It scores resumes based on:
+        - Keyword matches
+        - Skill relevance
+        - Years of experience
+        - Resume structure and completeness
 
-        Get started by navigating to the **Analyze Resumes** section.
+        Use the **Analyze Resume** section to start uploading resumes and viewing ATS scores. Explore how the app works in the **About** section.
     """)
-    st.image("https://example.com/ats_analyzer_hero.jpg", caption="Revolutionize your hiring process", use_column_width=True)
-    st.success("Ready to find your perfect candidate!")
+    st.image("https://www.example.com/welcome_image.png", caption="Optimize your hiring process with ATS Score Analyzer", use_column_width=True)
+    st.success("Ready to analyze resumes!")
 
-# Analyze Resumes Page
-elif page == "Analyze Resumes":
+
+# Analyze Resume Page
+elif page == "Analyze Resume":
     styled_header("Analyze Resumes")
     
     # Job Description input
-    job_description = st.text_area("Enter Job Description", height=200, placeholder="Paste the job description here...")
-    
-    # Skills input with validation and auto-complete
-    all_skills = ["Python", "Java", "JavaScript", "SQL", "Machine Learning", "Data Analysis", "Project Management", "Communication", "Leadership"]
-    skills = st.multiselect("Select Required Skills", options=all_skills, default=["Python", "SQL"])
-    custom_skill = st.text_input("Add Custom Skill")
-    if custom_skill:
-        skills.append(custom_skill)
+    job_description = st.text_area("Enter Job Description", height=300, placeholder="Paste the job description here...")
+    if job_description:
+        st.subheader("Job Description Preview:")
+        st.info(job_description)
+
+    # Skills input with validation
+    skills = st.text_input("Enter Skills (comma-separated)", placeholder="e.g., Python, SQL, Machine Learning")
+    if skills:
+        skills = [skill.strip() for skill in skills.split(",")]
+        st.subheader("Skills Preview:")
+        st.write(", ".join(skills))
 
     # Experience input
-    experience_years = st.number_input("Enter Required Experience (in years)", min_value=0, value=2)
+    experience_years = st.number_input("Enter Required Experience (in years)", min_value=0, value=1)
 
-    # File upload with multi-file support and drag-and-drop
+    # File upload with multi-file support
     uploaded_files = st.file_uploader("Upload Resumes (PDF or DOCX)", type=["pdf", "docx"], accept_multiple_files=True)
 
     if st.button("Analyze Resumes"):
         if job_description and skills and experience_years > 0 and uploaded_files:
-            with st.spinner("Analyzing resumes... This may take a moment."):
-                resume_paths = []
-                for uploaded_file in uploaded_files:
-                    with open(uploaded_file.name, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                        resume_paths.append(uploaded_file.name)
+            resume_paths = []
+            for uploaded_file in uploaded_files:
+                with open(uploaded_file.name, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+                    resume_paths.append(uploaded_file.name)
 
-                try:
-                    results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
-                    st.session_state['analysis_results'] = results
-                    st.success("Analysis complete! Scroll down to see results.")
+            try:
+                results = analyze_multiple_resumes(resume_paths, job_description, skills, experience_years)
+                st.subheader("Resume Scores:")
+                
+                csv_data = "Resume Name,Final Score,Keyword Match Score,Resume Structure Score,Skill Match Score,Years of Experience,Contact Info\n"
+                
+                for resume_name, scores in results.items():
+                    st.write(f"### {resume_name}")
+                    if 'error' in scores:
+                        st.error(f"Error processing resume: {scores['error']}")
+                    else:
+                        # Detailed score breakdown
+                        st.write(f"**Final Score:** {scores['final_score']:.2f}")
+                        st.write(f"**Keyword Match Score:** {scores['keyword_score']:.2f}")
+                        st.write(f"**Skill Match Score:** {scores['skill_match_score']:.2f}")
+                        st.write(f"**Years of Experience:** {scores['experience_years']}")
+                        st.write(f"**Contact Info:** {scores['contact_info']}")
 
-                    # Display results in an interactive table
-                    df = pd.DataFrame.from_dict(results, orient='index')
-                    st.dataframe(df.style.highlight_max(axis=0, subset=['final_score']))
+                        csv_data += f"{resume_name},{scores['final_score']:.2f},{scores['keyword_score']:.2f},{scores['structure_score']:.2f},{scores['skill_match_score']:.2f},{scores['experience_years']},{scores['contact_info']}\n"
 
-                    # Visualizations
-                    fig = px.bar(df, x=df.index, y='final_score', title='Candidate Scores Comparison')
-                    st.plotly_chart(fig)
+                    st.markdown("---")
 
-                    # Download results
-                    csv = df.to_csv(index=True)
+                # CSV Download
+                if csv_data:
+                    output = io.StringIO()
+                    output.write(csv_data)
+                    output.seek(0)
+
                     st.download_button(
-                        label="Download Results as CSV",
-                        data=csv,
-                        file_name="resume_analysis_results.csv",
+                        label="Download Scores as CSV",
+                        data=output.getvalue(),
+                        file_name="resume_scores.csv",
                         mime="text/csv"
                     )
 
-                except Exception as e:
-                    st.error(f"An error occurred: {str(e)}")
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
         else:
-            st.warning("Please fill in all fields and upload resumes.")
-
-# Candidate Comparison Page
-elif page == "Candidate Comparison":
-    styled_header("Candidate Comparison")
-    
-    if 'analysis_results' in st.session_state:
-        results = st.session_state['analysis_results']
-        df = pd.DataFrame.from_dict(results, orient='index')
-        
-        # Select candidates to compare
-        candidates = st.multiselect("Select candidates to compare", options=df.index.tolist())
-        
-        if candidates:
-            comparison_df = df.loc[candidates]
-            
-            # Radar chart for skill comparison
-            fig = px.line_polar(comparison_df, r='skill_match_score', theta=comparison_df.index, line_close=True)
-            st.plotly_chart(fig)
-            
-            # Detailed comparison table
-            st.table(comparison_df)
-            
-            # Individual candidate details
-            for candidate in candidates:
-                st.subheader(f"Detailed Analysis: {candidate}")
-                st.write(f"**Final Score:** {results[candidate]['final_score']:.2f}")
-                st.write(f"**Keyword Match:** {results[candidate]['keyword_score']:.2f}")
-                st.write(f"**Skills Matched:** {', '.join(results[candidate]['resume_skills'])}")
-                st.write(f"**Experience:** {results[candidate]['experience_years']} years")
-                st.write(f"**Contact Info:** {results[candidate]['contact_info']}")
-        else:
-            st.info("Select candidates to compare from the dropdown above.")
-    else:
-        st.info("No analysis results available. Please analyze resumes first.")
-
-# Settings Page
-elif page == "Settings":
-    styled_header("Settings")
-    
-    st.subheader("Scoring Weights")
-    keyword_weight = st.slider("Keyword Match Weight", 0.0, 1.0, 0.4, 0.1)
-    skill_weight = st.slider("Skill Match Weight", 0.0, 1.0, 0.3, 0.1)
-    experience_weight = st.slider("Experience Weight", 0.0, 1.0, 0.2, 0.1)
-    education_weight = st.slider("Education Weight", 0.0, 1.0, 0.1, 0.1)
-    
-    if st.button("Save Settings"):
-        # TODO: Implement settings save functionality
-        st.success("Settings saved successfully!")
+            st.error("Please fill in all fields and upload resumes.")
 
 # About Page
 elif page == "About":
-    styled_header("About Advanced ATS Resume Analyzer")
+    styled_header("About ATS Resume Analyzer")
     st.write("""
-        The **Advanced ATS Resume Analyzer** is a cutting-edge tool designed to revolutionize the recruitment process. 
-        Our system uses advanced natural language processing and machine learning algorithms to provide accurate, 
-        unbiased, and comprehensive analysis of resumes.
+        **ATS Resume Analyzer** is built for recruiters to streamline the resume screening process. 
+        It uses natural language processing to score resumes based on keyword matches, skills, and experience, providing a structured way to evaluate candidate fit.
         
         Key features:
-        - Intelligent keyword matching
-        - Skill relevance scoring
-        - Experience evaluation
-        - Education assessment
-        - Customizable scoring criteria
-        - Interactive visualizations
-        - Candidate comparison tools
-        
-        Start your journey to more efficient and effective hiring today!
+        - Automated resume scoring based on job descriptions
+        - Skill and experience assessment
+        - Resume structure analysis
     """)
-    st.info("💡 Tip: Regularly update your job descriptions and required skills to ensure the most relevant candidate matches.")
-    st.image("https://example.com/ats_features.png", caption="Advanced features for modern recruiting", use_column_width=True)
+    # Add a fun fact or tip
+    st.info("💡 Did you know? On average, recruiters spend only 7.4 seconds looking at a resume!")
+    st.image("https://www.example.com/about_image.png", caption="Streamline your hiring process", use_column_width=True)
+
+
+#---------------------------------
